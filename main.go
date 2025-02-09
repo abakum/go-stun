@@ -28,6 +28,7 @@ func main() {
 	var localIP = flag.String("i", "", "The ip on which to bind requests, set to empty will use default")
 	var behaviorTestMode = flag.Bool("b", false, "Enable NAT behavior test mode")
 	var verboseLevel = flag.Int("v", 0, "Verbose level (0: none, 1: verbose, 2: double verbose, 3: triple verbose)")
+	var externalIP = flag.Bool("e", false, "Get only external IP")
 	flag.Parse()
 
 	// Validate verbose level
@@ -43,6 +44,16 @@ func main() {
 	client.SetLocalIP(*localIP)
 	client.SetVerbose(*verboseLevel >= 1)
 	client.SetVVerbose(*verboseLevel >= 2)
+
+	// Get only external IP
+	if *externalIP {
+		err := getExternalIP(client)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	// Run behavior test if specified
 	if *behaviorTestMode {
@@ -80,5 +91,14 @@ func runBehaviorTest(c *stun.Client) error {
 		fmt.Println("Filtering Behavior:", natBehavior.FilteringType)
 		fmt.Println("   Normal NAT Type:", natBehavior.NormalType())
 	}
+	return nil
+}
+
+func getExternalIP(c *stun.Client) error {
+	ip, err := c.GetExternalIP()
+	if err != nil {
+		return err
+	}
+	fmt.Println("External IP:", ip)
 	return nil
 }

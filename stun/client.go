@@ -105,7 +105,7 @@ func (c *Client) Discover() (NATType, *Host, error) {
 	if conn == nil {
 		var laddr *net.UDPAddr
 
-		if c.localPort != 0  || c.localIP != "" {
+		if c.localPort != 0 || c.localIP != "" {
 			var address = fmt.Sprintf("%s:%d", c.localIP, c.localPort)
 
 			laddr, err = net.ResolveUDPAddr("udp", address)
@@ -139,7 +139,7 @@ func (c *Client) BehaviorTest() (*NATBehavior, error) {
 	conn := c.conn
 	if conn == nil {
 		var laddr *net.UDPAddr
-		if c.localPort != 0  || c.localIP != "" {
+		if c.localPort != 0 || c.localIP != "" {
 			var address = fmt.Sprintf("%s:%d", c.localIP, c.localPort)
 
 			laddr, err = net.ResolveUDPAddr("udp", address)
@@ -180,4 +180,46 @@ func (c *Client) Keepalive() (*Host, error) {
 		return nil, errors.New("failed to contact")
 	}
 	return resp.mappedAddr, nil
+}
+
+// Get only external IP.
+func (c *Client) GetExternalIP() (string, error) {
+	if c.serverAddr == "" {
+		c.SetServerAddr(DefaultServerAddr)
+	}
+	serverUDPAddr, err := net.ResolveUDPAddr("udp", c.serverAddr)
+	if err != nil {
+		return "", err
+	}
+	// Use the connection passed to the client if it is not nil, otherwise
+	// create a connection and close it at the end.
+	conn := c.conn
+	if conn == nil {
+		var laddr *net.UDPAddr
+		if c.localPort != 0 || c.localIP != "" {
+			var address = fmt.Sprintf("%s:%d", c.localIP, c.localPort)
+
+			laddr, err = net.ResolveUDPAddr("udp", address)
+			if err != nil {
+				return "", err
+			}
+
+			c.logger.Debugln("Local listen address: " + address)
+		}
+		conn, err = net.ListenUDP("udp", laddr)
+		if err != nil {
+			return "", err
+		}
+		defer conn.Close()
+	}
+	c.logger.Debugln("Send To:", serverUDPAddr)
+	resp, err := c.test1(conn, serverUDPAddr)
+	if err != nil {
+		return "", err
+	}
+	c.logger.Debugln("Received:", resp)
+	if resp == nil {
+		return "", fmt.Errorf(natStr[NATBlocked])
+	}
+	return resp.mappedAddr.IP(), nil
 }
