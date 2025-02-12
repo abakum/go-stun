@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ccding/go-stun/stun"
+	"github.com/abakum/go-stun/stun"
 )
 
 func main() {

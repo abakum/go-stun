@@ -2,8 +2,8 @@ go-stun
 =======
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-red.svg)](https://opensource.org/licenses/Apache-2.0)
-[![GoDoc](https://godoc.org/github.com/ccding/go-stun?status.svg)](http://godoc.org/github.com/ccding/go-stun/stun)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ccding/go-stun)](https://goreportcard.com/report/github.com/ccding/go-stun)
+[![GoDoc](https://godoc.org/github.com/abakum/go-stun?status.svg)](http://godoc.org/github.com/abakum/go-stun/stun)
+[![Go Report Card](https://goreportcard.com/badge/github.com/abakum/go-stun)](https://goreportcard.com/report/github.com/abakum/go-stun)
 
 go-stun is a STUN (RFC 3489, 5389) client implementation in golang
 (a.k.a. UDP hole punching).
@@ -19,7 +19,7 @@ Session Traversal Utilities for NAT (STUN)
 
 Simply run these commands (if you have installed golang and set `$GOPATH`)
 ```
-go get github.com/ccding/go-stun
+go get github.com/abakum/go-stun
 go-stun
 ```
 or clone this repo and run these commands
@@ -40,21 +40,21 @@ verbose mode.
 > ./go-stun --help
 Usage of ./go-stun:
   -s string
-        server address (default "stun1.l.google.com:19302")
+        server address (default "stun.fitauto.ru:3478")
   -v    verbose mode
 ```
 
 ### Use the Library
 
-The library `github.com/ccding/go-stun/stun` is extremely easy to use -- just
+The library `github.com/abakum/go-stun/stun` is extremely easy to use -- just
 one line of code.
 
 ```go
-import "github.com/ccding/go-stun/stun"
+import "github.com/abakum/go-stun/stun"
 
 func main() {
 	nat, host, err := stun.NewClient().Discover()
 }
 ```
 
-More details please go to `main.go` and [GoDoc](http://godoc.org/github.com/ccding/go-stun/stun)
+More details please go to `main.go` and [GoDoc](http://godoc.org/github.com/abakum/go-stun/stun)
