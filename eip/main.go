@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/abakum/go-stun/stun"
@@ -48,8 +49,12 @@ func GetExternalIP(timeout time.Duration, servers ...string) (ip, message string
 
 	ch := make(chan *IPfromSince)
 	defer close(ch)
+
+	var once sync.Once
 	t := time.AfterFunc(timeout, func() {
-		ch <- &IPfromSince{"", strings.Join(servers, ","), timeout, fmt.Errorf("timeout")}
+		once.Do(func() {
+			ch <- &IPfromSince{"", strings.Join(servers, ","), timeout, fmt.Errorf("timeout")}
+		})
 	})
 	defer t.Stop()
 	for _, server := range servers {
@@ -63,7 +68,9 @@ func GetExternalIP(timeout time.Duration, servers ...string) (ip, message string
 				return
 			}
 			// time.Sleep(time.Second)
-			ch <- &IPfromSince{ip, s, time.Since(t), nil}
+			once.Do(func() {
+				ch <- &IPfromSince{ip, s, time.Since(t), nil}
+			})
 		}(server)
 	}
 	i := <-ch
@@ -76,5 +83,8 @@ func GetExternalIP(timeout time.Duration, servers ...string) (ip, message string
 	if i.Err != nil {
 		return "127.0.0.1", message, fmt.Errorf("%s", message)
 	}
+
+	// time.Sleep(time.Second * 3)
+
 	return i.IP, message, nil
 }
